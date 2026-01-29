@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="res_brand_form_view_inherit_journal" model="ir.ui.view">
+        <field name="model">res.brand</field>
+        <field name="inherit_id" ref="brand.res_brand_form_view" />
+        <field name="arch" type="xml">
+            <field name="website" position="after">
+                <field name="company_id" invisible="1" />
+                <field name="journal_id" options="{'no_create': True}" />
+            </field>
+        </field>
+    </record>
+</odoo>
