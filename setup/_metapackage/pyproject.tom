@@ -1,0 +1,12 @@
+[project]
+name = "zverp-addons-brand"
+version = "16.0"
+dependencies = [
+    "odoo-addon-brand==16.0.*",
+    "odoo-addon-account_brand==16.0.*",
+]
+classifiers=[
+    "Programming Language :: Python",
+    "Framework :: Odoo",
+    "Framework :: Odoo :: 16.0",
+]
