@@ -8,7 +8,13 @@ class ResBrand(models.Model):
 
     journal_id = fields.Many2one(
         comodel_name="account.journal",
-        string="Invoice Journal",
+        string="Customer Invoice Journal",
         domain="['&', ('type', '=', 'sale'), '|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
-        help="Journal to use for invoices created with this brand.",
+        help="Sales journal to use for customer invoices created with this brand.",
+    )
+    purchase_journal_id = fields.Many2one(
+        comodel_name="account.journal",
+        string="Vendor Bill Journal",
+        domain="['&', ('type', '=', 'purchase'), '|', ('company_id', '=', False), ('company_id', 'in', allowed_company_ids)]",
+        help="Purchase journal to use for vendor bills created with this brand.",
     )

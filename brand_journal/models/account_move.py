@@ -6,22 +6,38 @@ from odoo import api, models
 class AccountMove(models.Model):
     _inherit = "account.move"
 
-    _BRAND_JOURNAL_MOVE_TYPES = (
+    _BRAND_SALE_JOURNAL_MOVE_TYPES = (
         "out_invoice",
         "out_refund",
+        "out_receipt",
+    )
+    _BRAND_PURCHASE_JOURNAL_MOVE_TYPES = (
         "in_invoice",
         "in_refund",
-        "out_receipt",
         "in_receipt",
+    )
+    _BRAND_JOURNAL_MOVE_TYPES = (
+        *_BRAND_SALE_JOURNAL_MOVE_TYPES,
+        *_BRAND_PURCHASE_JOURNAL_MOVE_TYPES,
     )
 
     @api.model
-    def _brand_journal_from_vals(self, vals):
+    def _brand_journal_from_brand(self, brand, move_type):
+        if not brand:
+            return False
+        if move_type in self._BRAND_SALE_JOURNAL_MOVE_TYPES:
+            return brand.journal_id
+        if move_type in self._BRAND_PURCHASE_JOURNAL_MOVE_TYPES:
+            return brand.purchase_journal_id
+        return False
+
+    @api.model
+    def _brand_journal_from_vals(self, vals, move_type):
         brand_id = vals.get("brand_id")
         if not brand_id:
             return False
         brand = self.env["res.brand"].browse(brand_id)
-        return brand.journal_id if brand else False
+        return self._brand_journal_from_brand(brand, move_type)
 
     def _default_journal_for_move(self):
         journal_model = self.env["account.journal"]
@@ -41,8 +57,9 @@ class AccountMove(models.Model):
         if self.move_type not in self._BRAND_JOURNAL_MOVE_TYPES:
             return
         if self.brand_id:
-            if self.brand_id.journal_id:
-                self.journal_id = self.brand_id.journal_id
+            journal = self._brand_journal_from_brand(self.brand_id, self.move_type)
+            if journal:
+                self.journal_id = journal
             return
         if reset_if_no_brand:
             default_journal = self._default_journal_for_move()
@@ -57,7 +74,7 @@ class AccountMove(models.Model):
             )
             if move_type not in self._BRAND_JOURNAL_MOVE_TYPES:
                 continue
-            journal = self._brand_journal_from_vals(vals)
+            journal = self._brand_journal_from_vals(vals, move_type)
             if journal:
                 vals["journal_id"] = journal.id
         return super().create(vals_list)
